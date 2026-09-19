@@ -10,6 +10,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.userdevnovtech.aivideoapp",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -19,6 +20,13 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9eac0147-7f63-4d20-bd8e-5190a5d3d4ea"
+      }
+    },
+    "plugins": [],
+    "owner": "userdevnovtech"
   }
 }

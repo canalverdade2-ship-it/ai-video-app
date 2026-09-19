@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export class GeminiService {
   constructor(apiKey) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    // Usando gemini-1.5-flash como fallback moderno já que os mais antigos estão descontinuados
+    // Usando gemini-pro como fallback moderno já que os mais antigos estão descontinuados
     this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   }
 

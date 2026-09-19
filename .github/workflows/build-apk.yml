@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
       - name: Setup Java
@@ -30,10 +30,13 @@ jobs:
         run: npm ci
 
       - name: Run Expo Prebuild (Generate Native Code)
-        run: npx expo prebuild --platform android --clean
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          npx expo prebuild --platform android --clean
 
       - name: Build Android Release APK
         run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
           cd android
           chmod +x ./gradlew
           ./gradlew assembleRelease

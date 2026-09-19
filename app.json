@@ -27,7 +27,13 @@
       }
     },
     "plugins": [
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "ffmpeg-expo",
+        {
+          "includeX86": true
+        }
+      ]
     ],
     "owner": "userdevnovtech"
   }

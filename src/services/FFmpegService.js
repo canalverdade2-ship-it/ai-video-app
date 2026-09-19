@@ -1,15 +1,6 @@
+import { execute, FFmpegError } from 'ffmpeg-expo';
 import * as FileSystem from 'expo-file-system';
 
-/**
- * FFmpegService - Versão sem biblioteca nativa
- * Usa a estratégia de concatenação por cópia direta.
- * Os clipes são salvos individualmente e o "vídeo final"
- * é o primeiro clipe (demonstração funcional).
- * 
- * Para edição avançada futura, pode-se usar:
- * - Cloud FFmpeg (AWS Lambda / Google Cloud Run)
- * - ffmpeg.wasm em WebView
- */
 export class FFmpegService {
   constructor() {
     this.tempDir = FileSystem.cacheDirectory + "ai_video_renders/";
@@ -23,17 +14,10 @@ export class FFmpegService {
   }
 
   /**
-   * "Renderiza" o vídeo final.
-   * Sem FFmpeg nativo, copia o melhor clipe como resultado.
-   * Os demais clipes ficam disponíveis para salvar na galeria.
+   * Concatena os clipes baixados em um único arquivo usando a CPU do celular
    */
   async renderVideo(clips, finalOutputName, onProgress) {
     await this.initCache();
-    
-    if (!clips || clips.length === 0) {
-      throw new Error("Nenhum clipe disponível para renderizar.");
-    }
-
     const finalOutputPath = this.tempDir + finalOutputName;
 
     // Remove arquivo antigo se existir
@@ -42,17 +26,50 @@ export class FFmpegService {
       await FileSystem.deleteAsync(finalOutputPath);
     }
 
-    if (onProgress) onProgress(50);
+    if (!clips || clips.length === 0) {
+      throw new Error("Nenhum clipe para renderizar.");
+    }
 
-    // Copia o primeiro clipe como "vídeo final"
-    await FileSystem.copyAsync({
-      from: clips[0],
-      to: finalOutputPath,
-    });
+    if (onProgress) onProgress(10);
 
-    if (onProgress) onProgress(100);
+    // Cria o arquivo de lista para concatenação (concat list)
+    const listPath = this.tempDir + "concat_list.txt";
+    let listContent = "";
+    for (const clip of clips) {
+      // O ffmpeg espera o caminho limpo sem "file://"
+      const cleanPath = clip.replace('file://', '');
+      listContent += `file '${cleanPath}'\n`;
+    }
+    
+    await FileSystem.writeAsStringAsync(listPath, listContent, { encoding: FileSystem.EncodingType.UTF8 });
+    const cleanListPath = listPath.replace('file://', '');
+    const cleanOutputPath = finalOutputPath.replace('file://', '');
 
-    console.log("Vídeo preparado com sucesso!");
-    return finalOutputPath;
+    console.log("Executando FFmpeg Nativo (ffmpeg-expo)...");
+    if (onProgress) onProgress(40);
+    
+    try {
+      // Usando -c copy para colar os vídeos sem recodificar (super rápido e 100% nativo)
+      const result = await execute([
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', cleanListPath,
+        '-c', 'copy',
+        '-y', cleanOutputPath
+      ]);
+      
+      console.log("Renderização concluída com sucesso. Código:", result.returnCode);
+      if (onProgress) onProgress(100);
+      return finalOutputPath;
+
+    } catch (error) {
+      if (error instanceof FFmpegError) {
+        console.error("FFmpeg falhou no hardware:", error.returnCode, error.output);
+        throw new Error("Falha nativa no motor de vídeo: " + error.output);
+      } else {
+        console.error("Erro inesperado no FFmpeg:", error);
+        throw new Error("Falha na renderização do vídeo.");
+      }
+    }
   }
 }

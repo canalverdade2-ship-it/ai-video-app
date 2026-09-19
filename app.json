@@ -26,7 +26,9 @@
         "projectId": "9eac0147-7f63-4d20-bd8e-5190a5d3d4ea"
       }
     },
-    "plugins": [],
+    "plugins": [
+      "expo-sharing"
+    ],
     "owner": "userdevnovtech"
   }
 }

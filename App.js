@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Linking } from 'react-native';
-import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { GeminiService } from './src/services/GeminiService';
@@ -19,7 +19,7 @@ export default function App() {
   const ffmpegService = new FFmpegService();
 
   useEffect(() => {
-    MediaLibrary.requestPermissionsAsync();
+    // Permissions removed
     const loadKeys = async () => {
       const gKey = await AsyncStorage.getItem('GEMINI_KEY');
       const pKey = await AsyncStorage.getItem('PEXELS_KEY');
@@ -82,7 +82,7 @@ export default function App() {
       const resultUri = await ffmpegService.renderVideo(downloadedClips, finalName, () => {});
 
       // Salvar na galeria automaticamente
-      await MediaLibrary.saveToLibraryAsync(resultUri);
+      await Sharing.shareAsync(resultUri);
       setVideoUri(resultUri);
       setScreen('PLAYER');
 

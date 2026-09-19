@@ -4,7 +4,7 @@ export class GeminiService {
   constructor(apiKey) {
     this.genAI = new GoogleGenerativeAI(apiKey);
     // Usando gemini-pro como fallback moderno já que os mais antigos estão descontinuados
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
   }
 
   async generateScript(prompt, autoScenes = false) {
